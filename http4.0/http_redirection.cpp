@@ -4,7 +4,7 @@
 	> Mail: 
 	> Created Time: 2018年07月29日 星期日 00时55分44秒
  ************************************************************************/
-
+#include<cstring>
 #include<iostream>
 #include<sys/socket.h>
 #include"http_redirection.h"
@@ -23,7 +23,7 @@ bool http_redirection(int clientfd,int code,string ip_port)
 	char status[32]="Move Permanently";
 
  // reponse proto
-	strcat(buff,"HTTP/1.0");
+	strcat(buff,"HTTP/1.1");
 	sprintf(scode,"%d",code);
 	strcat(buff," ");
 	strcat(buff,scode);
@@ -38,21 +38,24 @@ bool http_redirection(int clientfd,int code,string ip_port)
 	
   //location
     strcat(buff,"location:");
-	strcat(buff,ip_port.c_str());
+    string url="http://";
+    url+=ip_port;
+    url+="/";
+    strcat(buff,url.c_str());
 	strcat(buff,"\r\n");
     strcat(buff,"\r\n");
-
-	int res=send(clientfd,buff,strlen(buff),0);
+    int res=send(clientfd,buff,strlen(buff),0);
     bool flag=false;
     if(res>0)
     {
         cout<<"send status "<<res<<endl;
+        cout<<buff<<endl;
         flag=true;
     }
     else{
-        printf("send failed\n");
+        perror("send error:");
     }
-    return false;
+    return flag;
 }
 
 
