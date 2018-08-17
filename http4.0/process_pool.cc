@@ -204,18 +204,7 @@ int run_child(CHash &hash,int index)
                         printf(" accept fd=%d errno is %d\n",fd,errno);
                         continue;
                     }
-                  //  memset(users[connfd].buf,0,BUFFER_SIZE);
-                //    users[connfd].client_address=client_addr;//struct to struct 
-                 //   users[connfd].read_idx=0;
-                   // addfd(child_epollfd,connfd);
-                    //http reponse review
-                    /*
-                    string ip_port(inet_ntoa(client_addr.sin_addr.s_addr));
-                    string real_ip_port=find(ip_port);
-                    server_info ser;
-                   string_to_char(real_ip_port,ser);
-                   *p
-                   */
+                   
                     string tmp(inet_ntoa(client_addr.sin_addr));
                     string ip_port=hash.find(tmp);
                     //send http redireciton reponse;
@@ -231,75 +220,7 @@ int run_child(CHash &hash,int index)
                     //finidsh the connection bettewn dispatch and client
                 }
             }
-                else if(events[i].events && EPOLLIN)
-                {
-                    int idx=0;
-                    while(true)
-                    {
-                        idx=users[fd].read_idx;
-                        ret=recv(fd,users[fd].buf,BUFFER_SIZE,0);
-                        if(ret<0)
-                        {
-                            //
-                            if(errno!=EAGAIN)  
-                            {
-                                epoll_ctl(child_epollfd,EPOLL_CTL_DEL,fd,0);
-                                close(fd);
-                            }
-                            //ordinary read data successfully
-                           //  add send message
-                            break;
-                        }
-                        else if(ret==0)  //client close this connection  with ct
-                        {
-                            epoll_ctl(child_epollfd,EPOLL_CTL_DEL,fd,0);
-                            close(fd);  //thoroughly close the fd
-                            break;
-                        }
-                        else
-                        {
-
-                        /*   //  buffer is not emptypty 
-                            users[fd].read_idx+=ret;
-                            idx=users[fd].read_idx;
-                            printf("user's content is :%s\n",users[fd].buf);
-
-                            //
-                            if((idx<2) || (users[fd].buf[idx-2]!='\r') || (users[fd].buf[idx-1]!='\n'))
-                            {
-                                continue;
-                            }
-                            char* file_name=users[fd].buf;
-                            if(access(file_name,F_OK)==-1)
-                            {
-                                epoll_ctl(child_epollfd,EPOLL_CTL_DEL,fd,0);
-                                close(fd);
-                                break;
-                            }
-                            ret=fork();
-                            if(ret==-1)
-                            {
-                                epoll_ctl(child_epollfd,EPOLL_CTL_DEL,fd,0);
-                                close(fd);
-                                break;
-                            }
-                            else if(ret>0) 
-                            {
-                                epoll_ctl(child_epollfd,EPOLL_CTL_DEL,fd,0);
-                                close(fd);
-                                break;
-                            }
-                            else
-                            {
-                                close(STDOUT_FILENO);
-                                dup(fd);
-                                execl(users[fd].buf,users[fd].buf,0);
-                                exit(0);
-                            }
-                            */
-                        }   
-                    }
-                }
+            
 				else
                 {
                   continue; 
