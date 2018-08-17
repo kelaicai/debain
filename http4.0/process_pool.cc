@@ -22,7 +22,7 @@
 #include"md5.h"
 const int BUFFER_SIZE=1024;
 const int MAX_EVENT_NUMBER=1024;
-const int PROCESS_COUNT=5;
+const int PROCESS_COUNT=2;
 const int USER_PER_PROCESS=65536;
 
 #define IP_ADDR "127.0.0.1"
@@ -72,6 +72,14 @@ void addfd( int epollfd, int fd )
     event.events = EPOLLIN | EPOLLET;
     epoll_ctl( epollfd, EPOLL_CTL_ADD, fd, &event );
     setnonblocking( fd );
+}
+
+void delfd(int epollfd,int fd)
+{
+    if((epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,NULL))==-1)
+    {
+        perror("epoll_ctl_error");
+    }
 }
 void string_to_char(string ip_port,server_info & ser)
 {
@@ -151,7 +159,7 @@ int run_child(CHash &hash,int index)
 
     client_data *users=new client_data[USER_PER_PROCESS];
     
-    printf("index %d process run   and stop_child=%d\n",index,stop_child);
+    //printf("index %d process run   and stop_child=%d\n",index,stop_child);
     while(!stop_child)
     {  //how can i understand timeout=-1 and epoll_wait's return value ?
         int count=epoll_wait(child_epollfd,events,MAX_EVENT_NUMBER,5000);
@@ -196,10 +204,10 @@ int run_child(CHash &hash,int index)
                         printf(" accept fd=%d errno is %d\n",fd,errno);
                         continue;
                     }
-                    memset(users[connfd].buf,0,BUFFER_SIZE);
-                    users[connfd].client_address=client_addr;//struct to struct 
-                    users[connfd].read_idx=0;
-                    addfd(child_epollfd,connfd);
+                  //  memset(users[connfd].buf,0,BUFFER_SIZE);
+                //    users[connfd].client_address=client_addr;//struct to struct 
+                 //   users[connfd].read_idx=0;
+                   // addfd(child_epollfd,connfd);
                     //http reponse review
                     /*
                     string ip_port(inet_ntoa(client_addr.sin_addr.s_addr));
@@ -211,9 +219,11 @@ int run_child(CHash &hash,int index)
                     string tmp(inet_ntoa(client_addr.sin_addr));
                     string ip_port=hash.find(tmp);
                     //send http redireciton reponse;
-                    if(http_redirection(connfd,303,ip_port))
+                    if(http_redirection(connfd,301,ip_port))
                     {
                         cout<<"http_redirection successfully!"<<endl;
+                        shutdown(connfd,SHUT_RDWR); 
+                        cout<<"close"<<endl;
                     }else
                     {
                         cout<<"http_redirection failed !"<<endl;
@@ -221,7 +231,7 @@ int run_child(CHash &hash,int index)
                     //finidsh the connection bettewn dispatch and client
                 }
             }
-                else if(events[i].events & EPOLLIN)
+                else if(events[i].events && EPOLLIN)
                 {
                     int idx=0;
                     while(true)
@@ -248,7 +258,8 @@ int run_child(CHash &hash,int index)
                         }
                         else
                         {
-                           //  buffer is not emptypty 
+
+                        /*   //  buffer is not emptypty 
                             users[fd].read_idx+=ret;
                             idx=users[fd].read_idx;
                             printf("user's content is :%s\n",users[fd].buf);
@@ -285,6 +296,7 @@ int run_child(CHash &hash,int index)
                                 execl(users[fd].buf,users[fd].buf,0);
                                 exit(0);
                             }
+                            */
                         }   
                     }
                 }
